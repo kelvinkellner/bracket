@@ -1,5 +1,12 @@
 import random
 
+SEQUENCES = {
+    16: ['000', '100', '001', '200', '010', '101', '011', '300', '020', '110', '021', '201', '030', '111', '031', '400', '040', '120', '041', '210', '050', '121', '051', '301', '060', '130', '061', '211', '070', '131', '071'],
+    8: ['000', '100', '001', '200', '010', '101', '011', '300', '020', '110', '021', '201', '030', '111', '031'],
+    4: ['000', '100', '001', '200', '010', '101', '011'],
+    2: ['000', '100', '001']
+}
+
 # use 16 players for example
 players = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy', 'Kevin', 'Linda', 'Mike', 'Nancy', 'Oscar', 'Pamela']
 MAX_LEN = max(map(len, players))
@@ -23,8 +30,8 @@ def playMatch(player1, player2):
         while winner not in ['1', '2']:
             if winner != None:
                 print('Invalid input')
-            # winner = input('{:s} (1) vs. {:s} (2). Who won? (1/2): '.format(player1, player2))
-            winner = random.choice(['1', '2'])
+            winner = input('{:s} (1) vs. {:s} (2). Who won? (1/2): '.format(player1, player2))
+            # winner = random.choice(['1', '2'])
         return player1 if winner == '1' else player2
     
 def playRound(pairings):
@@ -45,33 +52,60 @@ def playRound(pairings):
 
 history = [generatePairings(players)]
 while len(history[-1]) > 1 or history[-1][0][1] is not None:
-    print(history[-1])
+    print('\n\nRound {:d}'.format(len(history)), end='\n\n')
+    print(history[-1][0][0], 'vs.', history[-1][0][1], end=' ')
+    for match in history[-1][1:]:
+        print('|', match[0], 'vs.', match[1], end='')
+    print('\n')
     history.append(playRound(history[-1]))
 print('Winner:', history[-1][0][0])
 
-def printNameLine(name, r, m, p, NUM_ROUNDS):
+def printNameLine(name, r, m, p, NUM_ROUNDS, NUM_PLAYERS):
+    # print(r, m, p, end=' ')
+    MAGIC_NUM = 1
     # Print a line of a name
-    for r in range(r):
-        print((' '*(MAX_LEN+4))+'|', end='')
-        if r == r-1:
-            print('_'*3, end='')
+    if (r == 0):
+        print('_', end='')
+    else:
+        print(' ', end='')
+    for i in range(r):
+        print((' '*(MAX_LEN+1+2*MAGIC_NUM))+'|', end='')
+        if i == r-1:
+            print('_'*MAGIC_NUM, end='')
         else:
-            print(' '*3, end='')
-    print((('{:s}')+'_'*3).format(name+' '+(MAX_LEN-len(name))*'_'))
+            print(' '*MAGIC_NUM, end='')
+    print((('{:_^'+str(MAX_LEN+3)+'s}')).format(name), end='')
+    r_p = m*2+p
+    if (r_p < NUM_PLAYERS//2**(r+1)):
+        print('', end='')
+    # else:
+    #     print('|', end='')
+        # temp_r = r+1
+        # total = r_p
+        # while total < NUM_PLAYERS//2**r-1:
+        #     temp_dist = (abs(r_p-(NUM_PLAYERS//2**(r+1)))-((m+1)//2)*2)
+        #     temp_r += 1
+        #     total = r_p + temp_r + temp_dist
+        #     print((' '*(MAX_LEN+2+2*MAGIC_NUM))+'|', end='')
+            # print(r_p, total, temp_r, temp_dist, end='>')
+            # break
+        # if (r_p < NUM_PLAYERS//2**r-1):
+        #     print((' '*(MAX_LEN+2+2*MAGIC_NUM))+'|', end='')
+        #     if (r_p+1 < NUM_PLAYERS//2**r-1):
+        #         print((' '*(MAX_LEN+2+2*MAGIC_NUM))+'|', end='')
+        # print(r_p, NUM_PLAYERS//2**r-1, end='>')
+            # print(True, end='')
+    print()
+
 
 def printBracket(history):
     # Print the full bracket
     NUM_ROUNDS = len(history)
+    NUM_PLAYERS = len(history[0])*2
     # print(('{:>'+str(MAX_LEN)+'}').format(history[i][0][0]))
-    draw = lambda r, m, p : printNameLine(history[r][m][p], r, m, p, NUM_ROUNDS)
-    sequence = [
-        '000', '100', '001', '200', '010', '101', '011', '300',
-        '020', '110', '021', '201', '030', '111', '031', '400',
-        '040', '120', '041', '210', '050', '121', '051', '301',
-        '060', '130', '061', '211', '070', '131', '071'
-    ]
+    draw = lambda r, m, p : printNameLine(history[r][m][p], r, m, p, NUM_ROUNDS, NUM_PLAYERS)
     indices = []
-    for s in sequence:
+    for s in SEQUENCES[NUM_PLAYERS]:
         r, m, p = map(int, s)
         indices.append((r, m, p))
     for i in indices:
